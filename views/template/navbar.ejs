@@ -1,0 +1,14 @@
+<div class="top-bar">
+    <div class="web-width">
+        <a class="git" href="https://github.com/crispantufla">GIT!</a>
+        <div class="user">
+            <% if (isLogged) { %>
+                <a class="sign-up" href="/register"><%= user %></a>
+                <a class="sign-in" href="/logOut">CERRAR SESIÓN</a>
+            <% } else { %>
+                <a class="sign-up" href="/register">Regístrate</a> o 
+                <a class="sign-in" href="/login">INICIAR SESIÓN</a>
+            <% }; %>
+        </div>
+    </div>
+</div>

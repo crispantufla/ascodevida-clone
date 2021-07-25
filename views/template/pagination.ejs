@@ -1,0 +1,87 @@
+<div class="pagination">
+    <button onClick=prevPage() id="prevButton">
+        PREV
+    </button>
+    <ul id="pages"></ul>
+    <button onClick=nextPage() id="nextButton">
+        NEXT
+    </button>
+    
+    <script>
+        let currentPage = <%= currentPage %>;
+        let url = new URL(window.location.href);
+        let search_params = url.searchParams;
+
+        function setPage() {
+            search_params.set('page', parseInt(this.dataset.page));
+            location.replace(url);
+        }
+
+        function nextPage() {
+            currentPage++;
+            search_params.set('page', currentPage);
+            location.replace(url);
+        }
+
+        function prevPage() {
+            currentPage--;
+            search_params.set('page', currentPage--);
+            location.replace(url);
+        }
+
+        const listEl = document.querySelector("#pages");
+
+        function addPages(newPages) {
+            for (let i = 0; i < newPages.length; i++) {
+                li = document.createElement("li");
+                if (newPages[i] == currentPage) {
+                    li.className = "actualPage"
+                }
+                if (newPages[i] != "...") {
+                    a = document.createElement("a")
+                    a.innerText = newPages[i];
+                    a.dataset.page = newPages[i];
+                    a.onclick = setPage;
+                    li.appendChild(a)
+                } else {
+                    li.innerText = newPages[i];
+                }
+                listEl.appendChild(li);
+            }
+        }
+
+        function pagination() {
+            let totalPages = <%= totalPages %>;
+            const pages = Array.from({length: totalPages}, (_, i) => i + 1);
+            listEl.innerHTML = "";
+            
+            let prevbutton = document.querySelector("#prevButton");
+            prevButton.disabled = (currentPage == 1);
+            let nextButton = document.querySelector("#nextButton");
+            nextButton.disabled = (currentPage == pages.length);
+
+            if (totalPages <= 7) {
+                addPages(pages);
+                return;
+            }
+            
+            if (currentPage <= 4) {
+                addPages([1, 2, 3, 4, 5]);
+            } else {
+                addPages([1, "..."]);
+            }
+            
+            if (currentPage > 4 && currentPage < totalPages - 3) {
+                addPages([currentPage - 1, currentPage, currentPage + 1]);
+            }
+            
+            if (currentPage >= totalPages - 3) {
+                addPages([totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages]);
+            } else {
+                addPages(["...", totalPages]);
+            }
+        }
+
+        pagination();
+    </script>
+</div>

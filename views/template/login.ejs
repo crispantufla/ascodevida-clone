@@ -1,0 +1,37 @@
+<div id="login">
+    <%- include('addContent', {categories, isLogged}) %>
+    <div class="box-top"><span class="white">inicio de </span><span class="color">sesión</span></div>
+    <div class="box-box">
+        <div class="box-content">
+            <h3 class="box-title">Inicia sesión</h3>
+            <p class="box-text">
+                Si aún no tienes tu cuenta, puedes crearla en <a href="/registro">este enlace</a>.
+            </p>
+            <form class="box-form" method="POST" action="/login">
+                <div class="box-field">
+                    <label class="box-label">Usuario *</label>
+                    <input name="nickname" type="text" class="box-input" required />
+                </div>
+                <div class="box-field">
+                    <label class="box-label">Contraseña *</label>
+                    <input name="password" type="password" class="box-input" required />
+                </div>
+                <div class="box-field not-label">
+                    <input type="checkbox" class="box-checkbox"/>
+                    <span>Recuérdame</span>
+                </div>
+                <% if (response.errorMsg) { %> 
+                    <div class="box-field not-label">
+                        <span class="form-response"><%= response.errorMsg %></span>
+                    </div>
+                 <% }; %>
+                <div class="box-field not-label">
+                    <button type="submit" class="button-submit">Iniciar sesión</button>
+                </div>
+            </form>
+            <p class="box-text">
+                <a>¿Olvidaste tu contraseña?</a>
+            </p>
+        </div>
+    </div>
+</div>

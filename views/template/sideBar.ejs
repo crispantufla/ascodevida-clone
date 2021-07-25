@@ -1,0 +1,14 @@
+<div class="sidebar">
+    <ul>
+        <% categories.forEach((category) => { %>
+            <li><a href="/?category=<%=category.shortName%>"><%=category.name%></a></li>
+        <% }); %>
+    </ul>
+    <div class="search">
+        <form method="POST" id="search">
+            <input id="submit" type="submit" value="buscar">
+            <input id="text" type="text" name="text"><br>
+            <span><a>Búsqueda avanzada</a></span>
+        </form>
+    </div>
+</div>

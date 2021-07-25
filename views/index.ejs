@@ -1,0 +1,19 @@
+<%- include('template/head'); %>
+<body>
+	<%- include('template/navbar'); %>
+	<%- include('template/header'); %>
+	<div class="container">
+		<div class="main">
+			<%- include('template/addContent') %>
+			<% if ( place == "home" ) { %>
+				<%- include('template/home') %>
+			<% } else if ( place == "register") { %>
+				<%- include('template/register') %>
+			<% } else { %>
+				<%- include('template/login') %>
+			<% }; %>
+		</div>
+		<%- include('template/sideBar'); %>
+	</div>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<div class="twit-box" id="<%=(post._id)%>">
+    <div class="comment-box">
+      <span><a>2</a></span>
+    </div>
+    <div class="pre">
+      Publicado por <span class="gender-span">♀</span> 
+      <span>
+        <% if (post.name) { %><%=post.name%> <% } else { %>Anonimo<% }; %>
+      </span> el
+      <span>
+        <%= post.createdAt.toLocaleString('es-ES', {year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}) %> 
+      </span> / <a href="/?category=<%=post.category.shortName%>"><%= post.category.name %> </a>
+    </div>
+      <p class="story">
+        <a class="story-link">
+          <%= post.content %>
+        </a>
+      </p>
+    <div class="bottom-twit" data-id=<%=(post._id)%>>
+      <span><a onclick="voteFetch({path: 'vota', element: this, type: 1, method: 'POST'})">Vaya asco de vida</a> (<span class="vota-adv1"><% if (post.type1) { %> <%= post.type1 %><% } else { %>0<% } %></span>)</span> -
+      <span><a onclick="voteFetch({path: 'vota', element: this, type: 2, method: 'POST'})">Haberlo Pensado</a> (<span class="vota-adv2"><% if (post.type2) { %> <%= post.type2 %><% } else { %>0<% } %></span>)</span> -
+      <span><a onclick="voteFetch({path: 'vota', element: this, type: 3, method: 'POST'})">Menuda Chorrada</a> (<span class="vota-adv3"><% if (post.type3) { %> <%= post.type3 %><% } else { %>0<% } %></span>)</span>
+      <% if (isLogged) { %>
+        <% if (post.alreadyFav) { %>
+        - <span>En tus favoritos <a onclick="voteFetch({path: 'addfav', element: this, method: 'DELETE'})">(eliminar)</a></span>
+        <% } else { %>
+          - <span><a onclick="voteFetch({path: 'addfav', element: this, method: 'POST'})">A favoritos</a></span>
+        <% } %>
+      <% } %>
+      <div class="to-share">
+        <a><img src="../images/twitter_button_share.png" alt="Onde ta mi imagen?"></a>
+        <a><img src="../images/facebook_button_share.png" alt="Onde ta mi imagen?"></a>
+      </div>
+    </div>
+</div>
+<script src="./js/voteFetch.js"></script>

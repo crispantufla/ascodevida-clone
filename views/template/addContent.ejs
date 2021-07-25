@@ -1,0 +1,72 @@
+<div clas="add-content" id="add-content">
+    <div class="box-top"><span class="white">publica tu </span><span class="color">anécdota</span></div>
+    <div class="box-box">
+        <h3 class="box-title">Por favor, respeta las <a>reglas al publicar</a></h3>
+        <div class="box-content">
+            <ul class="box-list">
+                <li class="box-item">
+                    * No hay temas tabú, exprésate en 400 caracteres. Evita historias de quinceañeras propias de la SuperPOP.
+                </li>
+                <li class="box-item box-item-color">
+                    * Lee y repasa tu mensaje. Escribe correctamente evitando errores ortográficos y lenguaje sms. Los ADV mal redactados y con errores no serán publicados.
+                </li>
+                <li class="box-item">
+                    * Si tu anécdota no es publicada, no te ofendas, ¡agradecemos enormemente tu colaboración!
+                </li>
+            </ul>
+            <form class="box-form" method="POST" action="/post">
+                <% if (!isLogged) { %> 
+                    <div class="box-field">
+                        <input name="name" id="nickname" type="text" class="add-content-input" placeholder="Nombre" required />
+                    </div>
+                <% } %>
+                <div class="box-field">
+                    <select name="category">
+                        <option disabled selected>Categoria</option>
+                        <% categories.forEach((category) => { %>
+                            <option value="<%=category.id%>"><%=category.name%></option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div class="box-field">
+                    <select name="gender">
+                        <option disabled selected>sexo</option>
+                        <option value="Hombre">Hombre</option>
+                        <option value="Mujer">Mujer</option>
+                    </select>
+                </div>
+                <div class="box-field" style="clear: both;">
+                    <select name="when" id="when">
+                        <option disabled selected>¿Cuándo?</option>
+                        <option value="Hoy">Hoy</option>
+                        <option value="Ayer">Ayer</option>
+                        <option value="La semana pasada">La semana pasada</option>
+                        <option value="Hace unos meses">Hace unos meses</option>
+                        <option value="Hace unos años">Hace unos años</option>
+                        <option value="Hace tiempo">Hace tiempo</option>
+                    </select>
+                </div>
+                <div class="box-field">
+                    <textarea name="content" id="text-to-post" onkeyup="uploadPreview()" rows="7" maxlength="400" minlength="10" required></textarea>
+                </div>
+                <div class="box-field">
+                    <h3>Vista previa de tu ADV</h3>
+                    <div id="upload-preview"></div>
+                    <script src="./js/uploadPreview.js"></script>
+                </div>
+                <% if (!isLogged) { %> 
+                    <div class="box-field not-label-content">
+                        <input name="email" type="text" class="add-content-input" placeholder="email(opcional)"/>
+                    </div>
+                <% } %>
+                <div class="box-field not-label-content">
+                    <input type="checkbox" class="box-checkbox" required/>
+                    <span>Acepto los <a>Términos de uso</a> , <a>Política de privacidad</a> y <a>la Política de cookies</a></span>
+                </div>
+                <div class="box-field not-label-content">
+                    <button type="submit" class="button-submit">Enviar ADV</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
