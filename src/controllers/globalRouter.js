@@ -1,12 +1,14 @@
 const express = require('express');
 const models = require('../mongo');
-const {validationChecks, categoriesLoad, isLogged} = require('./data/middlewares');
-const {check} = require('express-validator');
-var rand = require('csprng');
-var CryptoJS = require("crypto-js");
+const { validationChecks, categoriesLoad, isLogged } = require('./data/middlewares');
+const { check } = require('express-validator');
+const rand = require('csprng');
+const CryptoJS = require("crypto-js");
+const mongoose = require('mongoose');
+
 
 const globalRouter = () => {
-	var router = express.Router();
+	const router = express.Router();
 
 	router.use('/', isLogged, categoriesLoad, (req, res, next) => {
 		router.renderParams = {
@@ -24,7 +26,7 @@ const globalRouter = () => {
 	router.get('/', async (req, res) => {
 		let finalQuery = {};
 		let categoryQuery = null;
-		
+
 		if (req.query.category) {
 			categoryQuery = await models.category.findOne({ shortName: req.query.category })
 			if (categoryQuery) {
@@ -33,7 +35,7 @@ const globalRouter = () => {
 		}
 
 		if (req.query.search) {
-			finalQuery.content = {"$regex": req.query.search, "$options": "i"}
+			finalQuery.content = { "$regex": req.query.search, "$options": "i" }
 		}
 
 		let totalPosts = await models.post.countDocuments(finalQuery);
@@ -42,7 +44,7 @@ const globalRouter = () => {
 		if (req.query.type) {
 			finalQuery = finalQuery.sort({ [`type${req.query.type}`]: -1 })
 		} else {
-			finalQuery = finalQuery.sort({createdAt: -1})
+			finalQuery = finalQuery.sort({ createdAt: -1 })
 		}
 
 		//PAGINATION
@@ -64,9 +66,9 @@ const globalRouter = () => {
 		}
 
 		return finalQuery.then(async (posts) => {
-			if (req.isLogged){
+			if (req.isLogged) {
 				for (let x = 0; x < posts.length; x++) {
-					let fav = await models.favorite.findOne({ post: posts[x]._id, user: req.user._id});
+					let fav = await models.favorite.findOne({ post: posts[x]._id, user: req.user._id });
 					if (fav) {
 						posts[x].alreadyFav = fav._id;
 					} else {
@@ -88,8 +90,8 @@ const globalRouter = () => {
 	})
 
 	router.use('/search/:namesearch/', async (req, res) => {
-        const namesearch = req.params.namesearch;
-		let totalPosts = await models.post.countDocuments({"content": {"$regex": namesearch, "$options": "i"}});
+		const namesearch = req.params.namesearch;
+		let totalPosts = await models.post.countDocuments({ "content": { "$regex": namesearch, "$options": "i" } });
 		let currentPage = req.query.page;
 		let limit = 15;
 		let totalPages = Math.ceil(totalPosts / limit);
@@ -98,28 +100,48 @@ const globalRouter = () => {
 			return res.status(404).redirect('/')
 		}
 
-        return models.post.find({"content": {"$regex": namesearch, "$options": "i"}}).limit(limit).skip(skip)
-        .then(posts => {
-			if (posts.length > 0) {
-				res.status(200).render('index', {
-					posts: posts,
-					totalPages: totalPages,
-					categories: req.categories,
-					isLogged: req.isLogged,
-					user: (req.isLogged ? req.user.nickname : null),
-					totalPages: totalPages
-				})
-			} else {
-				res.status(200).send({menssage: "no result data"})
-			}
-		}).catch((err) => {
-			res.status(500).send({error: err})
-		})
-    })
+		return models.post.find({ "content": { "$regex": namesearch, "$options": "i" } }).limit(limit).skip(skip)
+			.then(posts => {
+				if (posts.length > 0) {
+					res.status(200).render('index', {
+						posts: posts,
+						totalPages: totalPages,
+						categories: req.categories,
+						isLogged: req.isLogged,
+						user: (req.isLogged ? req.user.nickname : null),
+						totalPages: totalPages
+					})
+				} else {
+					res.status(200).send({ menssage: "no result data" })
+				}
+			}).catch((err) => {
+				res.status(500).send({ error: err })
+			})
+	})
 
 	//CREAR POST
-	router.post('/post', (req, res) => {
-		let fixedContent = `${req.body.when} ${req.body.content}. ADV`;
+	router.post('/post', async (req, res) => {
+
+		if (!mongoose.Types.ObjectId.isValid(req.body.category)) {
+			return res.status(404).redirect('/')
+		}
+
+		let searchCategory = await models.category.findOne({ _id: req.body.category })
+		if (!searchCategory) {
+			return res.status(404).redirect('/')
+		}
+
+		if (req.body.gender != "Hombre" && req.body.gender != "Mujer") {
+			return res.status(404).redirect('/')
+		}
+
+		if (req.body.when < 0 || req.body.when > 5) {
+			return res.status(404).redirect('/')
+		}
+
+		const whenArray = ["Hoy", "Ayer", "La semana pasada", "Hace unos meses", "Hace unos años", "Hace tiempo"];
+		let fixedContent = `${whenArray[req.body.when]} ${req.body.content}. ADV`;
+
 		let postObject = {
 			content: fixedContent,
 			gender: req.body.gender,
@@ -127,6 +149,7 @@ const globalRouter = () => {
 			name: (req.isLogged ? req.user.nickname : req.body.name),
 			user: (req.isLogged ? req.user._id : null)
 		}
+
 		let post = new models.post(postObject);
 		return post.save().then(() => {
 			res.status(200).redirect('/')
@@ -157,13 +180,13 @@ const globalRouter = () => {
 		}
 
 		return vote.save().then(result => {
-			models.post.findByIdAndUpdate(result.post, { 
-				$push: { votes: result.id }, $inc: { [`type${result.type}`]: 1 } 
+			models.post.findByIdAndUpdate(result.post, {
+				$push: { votes: result.id }, $inc: { [`type${result.type}`]: 1 }
 			}).then(
 				res.status(200).send({ message: message[req.params.type - 1] }))
-			.catch(err => {
-				res.status(500).send({ error: err })
-			})
+				.catch(err => {
+					res.status(500).send({ error: err })
+				})
 		})
 	})
 
@@ -195,15 +218,23 @@ const globalRouter = () => {
 	//REGISTRARSE Y LOGEARSE 
 
 	const arrayChecks = [
-		check('email').normalizeEmail().isEmail().withMessage('Introduzca una dirección de correo electrónico válida'),
-		check('password').isStrongPassword({
-			minLength: 8,
-			maxLength: 16,
-			minLowercase: 1,
-			minUppercase: 1,
-			minNumbers: 1
-		}).withMessage('Tu contraseña debe contener almenos 8 caracteres, debe contener almenos una mayuscula y una minuscula y un simbolo'),
-		check('nickname').not().isEmpty().isLength({ min: 6, max: 12 }).withMessage('Tu Usuario debe contener almenos 6 caracteres y maximo 12')
+		check('email')
+			.normalizeEmail()
+			.isEmail()
+			.withMessage('Introduzca una dirección de correo electrónico válida'),
+		check('password')
+			.isStrongPassword({
+				minLength: 8,
+				minLowercase: 1,
+				minUppercase: 1,
+				minNumbers: 1
+			})
+			.withMessage('Tu contraseña debe contener almenos 8 caracteres, debe contener almenos una mayuscula y una minuscula y un simbolo'),
+		check('nickname')
+			.custom(value => !/\s/.test(value))
+			.withMessage('No se permiten espacios')
+			.isLength({ min: 3, max: 16 })
+			.withMessage('Tu Usuario debe contener almenos 6 caracteres y maximo 12')
 	]
 
 	router.get('/register', (req, res) => {
@@ -212,11 +243,18 @@ const globalRouter = () => {
 		res.status(200).render('index', router.renderParams);
 	})
 
-	router.post('/register',  arrayChecks, validationChecks, async (req, res) => {
+	router.post('/register', arrayChecks, validationChecks, async (req, res) => {
 		router.renderParams.place = "register";
+
+		if (req.validationChecksError) {
+			router.renderParams.response = { errorMsg: req.validationChecksError };
+			console.log(req.validationChecksError)
+			return res.status(409).render('index', router.renderParams);
+		}
+
 		let user = new models.user(req.body);
 		user.password = CryptoJS.SHA256(user.password);
-		let users = await models.user.find(({ $or: [{ email: user.email }, { nickname : user.nickname }] }));
+		let users = await models.user.find(({ $or: [{ email: user.email }, { nickname: user.nickname }] }));
 		if (users.length == 0) {
 			return user.save().then(() => {
 				res.status(200).redirect('/')
@@ -235,7 +273,7 @@ const globalRouter = () => {
 		res.status(409).render('index', router.renderParams);
 	})
 
-	router.get('/login', (req, res) => {		
+	router.get('/login', (req, res) => {
 		router.renderParams.place = "login";
 		router.renderParams.titleWeb = 'ADV / Login'
 		res.status(200).render('index', router.renderParams);
@@ -246,7 +284,7 @@ const globalRouter = () => {
 		const user = req.body;
 		user.password = CryptoJS.SHA256(user.password);
 		user.password = user.password.toString(CryptoJS.enc.Hex);
-		let resultUser = await models.user.findOne({nickname: user.nickname});
+		let resultUser = await models.user.findOne({ nickname: user.nickname });
 		if (resultUser) {
 			if (resultUser.password == user.password) {
 				let token = rand(300, 36);
@@ -287,22 +325,22 @@ const globalRouter = () => {
 			}
 			return res.status(409).send({ message: 'Ya has solicitado un cambio de contraseña, Por favor revisa tu Email' })
 		}
-		res.status(409 ).send({ message: 'Email incorrect' })
+		res.status(409).send({ message: 'Email incorrect' })
 	})
-	
+
 	router.use('/resetpass', async (req, res) => {
 		const { verifyPassCode, password, email } = req.body;
 		const passCode = await models.verifyPassCode.find({ verifyPassCode: verifyPassCode });
 		if (passCode.length > 0 && passCode[0].email === email) {
 			await models.user.findOneAndUpdate({ email: passCode[0].email }, { password })
-			.then(savedUser => {
-				if (savedUser) {
-					res.status(200).send({ message: 'La contraseña de ha cambiado correctamente' });
-					return models.verifyPassCode.findByIdAndDelete(passCode[0].id);
-				};
-			}).catch((err) => {
-				res.status(500).send({ error: err })
-			});
+				.then(savedUser => {
+					if (savedUser) {
+						res.status(200).send({ message: 'La contraseña de ha cambiado correctamente' });
+						return models.verifyPassCode.findByIdAndDelete(passCode[0].id);
+					};
+				}).catch((err) => {
+					res.status(500).send({ error: err })
+				});
 		} else {
 			res.status(409).send({ message: 'Algo no sucedio como se lo esparaba' })
 		}

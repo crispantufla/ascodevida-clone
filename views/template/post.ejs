@@ -3,7 +3,7 @@
       <span><a>2</a></span>
     </div>
     <div class="pre">
-      Publicado por <span class="gender-span">♀</span> 
+      Publicado por <span class="gender-span"><% if (post.gender == "Hombre") { %>♂<% } else { %>♀<% }; %></span>
       <span>
         <% if (post.name) { %><%=post.name%> <% } else { %>Anonimo<% }; %>
       </span> el

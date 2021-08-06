@@ -101,6 +101,11 @@ body {
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
+.header-container .logo img {
+    height: 100px;
+    width: 180px;
+}
+
 .header-container .logo:hover + .bubble {
     display: block;
 }
@@ -277,7 +282,7 @@ body {
     text-decoration: none;
 }
 
-.pre .gender {
+.gender-span {
     color: #cc0099;
 }
 
@@ -367,12 +372,17 @@ body {
     background: #cc0099;
     padding: 6px;
     border-radius: 5px;
-    cursor: pointer;
 }
 
-.pagination button:hover {
+.pagination button:disabled {
+    color: #cc0099;
+    opacity: 0.2;
+}
+
+.pagination button:enabled:hover {
     color: #cc0099;
     background: #fff;
+    cursor: pointer;
 }
 
 .pagination ul li {
@@ -380,6 +390,8 @@ body {
     display: inline;
     margin: 3px;
 }
+
+
 
 .pagination ul li a {
     display: inline-block;

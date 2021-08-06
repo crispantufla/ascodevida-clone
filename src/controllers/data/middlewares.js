@@ -5,10 +5,8 @@ const validationChecks = (req, res, next) => {
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
 		let error = {}; errors.array().map((err) => error = err.msg);
-		return res.status(409).render(req.url.slice(1), {
-			categories: req.categories,
-			response : { errorMsg: error }
-		});
+		req.validationChecksError = error;
+		return next();
 	}
 
 	next();
