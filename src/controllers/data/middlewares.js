@@ -24,7 +24,7 @@ const isLogged = async (req, res, next) => {
 		req.isLogged = true;
 		const user = await models.cookies.findOne({ token: req.cookies.userLog }).populate('user', ['nickname', 'email']);
 		req.user = user.user;
-		if (req.url == '/login' || req.url =='/register') {
+		if (req.url == '/login' || req.url == '/register') {
 			return res.redirect('/')
 		};
 	};

@@ -16,7 +16,8 @@ const globalRouter = () => {
 			isLogged: req.isLogged,
 			response: "empty",
 			user: (req.isLogged ? req.user.nickname : null),
-			titleWeb: 'ADV'
+			titleWeb: 'ADV',
+			needPagination: true
 		}
 
 		next()
@@ -47,13 +48,17 @@ const globalRouter = () => {
 			finalQuery = finalQuery.sort({ createdAt: -1 })
 		}
 
-		//PAGINATION
+		//pagination
 		let currentPage = 1;
 		if (req.query.page) {
 			currentPage = req.query.page;
 		}
 		let limit = 15;
 		let totalPages = Math.ceil(totalPosts / limit);
+		if (totalPages <= 1) {
+			router.renderParams.needPagination = false;
+		}
+
 		let skip = (currentPage - 1) * limit;
 		if (skip < 0) {
 			return res.status(404).redirect('/')
@@ -63,6 +68,7 @@ const globalRouter = () => {
 
 		if (req.query.sort == "aleatorio") {
 			finalQuery = models.post.aggregate().sample(limit);
+			router.renderParams.needPagination = false;
 		}
 
 		return finalQuery.then(async (posts) => {
@@ -89,6 +95,7 @@ const globalRouter = () => {
 		})
 	})
 
+	//SEARCH
 	router.use('/search/:namesearch/', async (req, res) => {
 		const namesearch = req.params.namesearch;
 		let totalPosts = await models.post.countDocuments({ "content": { "$regex": namesearch, "$options": "i" } });
@@ -119,7 +126,7 @@ const globalRouter = () => {
 			})
 	})
 
-	//CREAR POST
+	//CREATE POST
 	router.post('/post', async (req, res) => {
 
 		if (!mongoose.Types.ObjectId.isValid(req.body.category)) {
@@ -158,7 +165,7 @@ const globalRouter = () => {
 		})
 	})
 
-	//VOTAR POST
+	//VOTE POST
 	router.post('/vota/:postId/:type', async (req, res) => {
 		if (!req.isLogged) {
 			return res.send({ message: "Solo usuarios registrados pueden votar" })
@@ -183,14 +190,47 @@ const globalRouter = () => {
 			models.post.findByIdAndUpdate(result.post, {
 				$push: { votes: result.id }, $inc: { [`type${result.type}`]: 1 }
 			}).then(
-				res.status(200).send({ message: message[req.params.type - 1] }))
-				.catch(err => {
-					res.status(500).send({ error: err })
-				})
+				res.status(200).send({ message: message[req.params.type - 1] })
+			).catch(err => {
+				res.status(500).send({ error: err })
+			})
 		})
 	})
 
-	//AGREGAR Y ELIMINAR DE FAVORITOS
+	//USERS POSTS
+	router.get('/perfil', (req, res) => {
+		return models.post.find({user: req.user.id})
+			.populate('category', ['name', 'shortName'])
+			.populate('user', 'nickname')
+			.then(posts => {
+			router.renderParams.needPagination = false;
+			router.renderParams.place = "home";
+			router.renderParams.posts = posts;
+			router.renderParams.titleWeb = 'ADV / Mis posts'
+			res.status(200).render('index', router.renderParams);
+		}).catch(err => {
+			res.status(500).send({ error: err })
+			console.log(err)
+		})
+	})
+
+
+	//FAVS, ADD AND DELETE FAVS
+	router.get('/favoritos', (req, res) => {
+		return models.favorite.find({user: req.user.id}).populate('post').then(userFavorites => {
+			for (let x = 0; x < userFavorites.length; x++){
+				userFavorites[x].post.alreadyFav = userFavorites[x]._id
+				userFavorites[x] = userFavorites[x].post;
+			}
+			router.renderParams.needPagination = false;
+			router.renderParams.place = "home";
+			router.renderParams.posts = userFavorites;
+			router.renderParams.titleWeb = 'ADV / Favoritos'
+			res.status(200).render('index', router.renderParams);
+		}).catch(err => {
+			res.status(500).send({ error: err })
+		})
+	})
 
 	router.post('/addfav/:postId', (req, res) => {
 		let favorite = new models.favorite({

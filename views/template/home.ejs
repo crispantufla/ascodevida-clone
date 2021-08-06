@@ -3,7 +3,7 @@
         <% posts.forEach((post) => { %>
             <%- include('post', {post}) %>
         <% }); %>
-        <%- include('pagination') %>
+        <% if (needPagination) { %><%- include('pagination') %><% } %> 
     <% } else { %>
         <div class="noPostsYet">Ups.. parece que aqui aun no hay posts</div>
     <% } %>
