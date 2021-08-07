@@ -13,6 +13,7 @@ const validationChecks = (req, res, next) => {
 }
 
 const categoriesLoad = async (req, res, next) => {
+	console.log("im in categoriesLoad")
 	let categories = await models.category.find().sort({ name: 1 });
 	req.categories = categories;
 	next();
