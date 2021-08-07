@@ -10,7 +10,7 @@ const Favorite = require('./schemas/Favorite');
 
 const connect = async () => {
     console.log("try to connect")
-    await mongoose.connect('mongodb+srv://admin:1234@cluster0.9lknw.mongodb.net/myFirstDatabase?retryWrites=true&w=majority', { useUnifiedTopology: true ,useNewUrlParser: true, useCreateIndex: true })
+    await mongoose.connect('mongodb+srv://admin:vA3WC3XFAs8nMWQPcw3PD@cluster0.9lknw.mongodb.net/myFirstDatabase?retryWrites=true&w=majority', { useUnifiedTopology: true ,useNewUrlParser: true, useCreateIndex: true })
     console.log("db connect")
 }
 
