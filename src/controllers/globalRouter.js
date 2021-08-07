@@ -6,7 +6,6 @@ const rand = require('csprng');
 const CryptoJS = require("crypto-js");
 const mongoose = require('mongoose');
 
-
 const globalRouter = () => {
 	const router = express.Router();
 
@@ -42,6 +41,7 @@ const globalRouter = () => {
 		let totalPosts = await models.post.countDocuments(finalQuery);
 		finalQuery = models.post.find(finalQuery).populate('category', ['name', 'shortName']).populate('user', 'nickname');
 
+		//validar req.query.type
 		if (req.query.type) {
 			finalQuery = finalQuery.sort({ [`type${req.query.type}`]: -1 })
 		} else {
@@ -75,11 +75,7 @@ const globalRouter = () => {
 			if (req.isLogged) {
 				for (let x = 0; x < posts.length; x++) {
 					let fav = await models.favorite.findOne({ post: posts[x]._id, user: req.user._id });
-					if (fav) {
-						posts[x].alreadyFav = fav._id;
-					} else {
-						posts[x].alreadyFav = false;
-					}
+					posts[x].alreadyFav = !!fav;
 				}
 			}
 
@@ -214,14 +210,13 @@ const globalRouter = () => {
 		})
 	})
 
-
 	//FAVS, ADD AND DELETE FAVS
 	router.get('/favoritos', (req, res) => {
 		return models.favorite.find({user: req.user.id}).populate('post').then(userFavorites => {
-			for (let x = 0; x < userFavorites.length; x++){
-				userFavorites[x].post.alreadyFav = userFavorites[x]._id
-				userFavorites[x] = userFavorites[x].post;
-			}
+			userFavorites = userFavorites.map(item => {
+				item.post.alreadyFav = true;
+				return item.post;
+			});
 			router.renderParams.needPagination = false;
 			router.renderParams.place = "home";
 			router.renderParams.posts = userFavorites;

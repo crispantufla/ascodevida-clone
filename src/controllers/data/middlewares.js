@@ -23,7 +23,11 @@ const isLogged = async (req, res, next) => {
 	if (req.cookies.userLog) {
 		req.isLogged = true;
 		const user = await models.cookies.findOne({ token: req.cookies.userLog }).populate('user', ['nickname', 'email']);
+		if (user) {
 		req.user = user.user;
+		} else {
+			return res.redirect('/')
+		}
 		if (req.url == '/login' || req.url == '/register') {
 			return res.redirect('/')
 		};
