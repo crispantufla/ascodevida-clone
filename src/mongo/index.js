@@ -18,4 +18,4 @@ module.exports = {
 	verifyPassCode: VerifyPassCode,
 	cookies: Cookies,
 	favorite: Favorite
-};
+}
