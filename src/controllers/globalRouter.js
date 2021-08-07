@@ -6,6 +6,8 @@ const rand = require('csprng');
 const CryptoJS = require("crypto-js");
 const mongoose = require('mongoose');
 
+console.log("in im globalRouter")
+
 const globalRouter = () => {
 	const router = express.Router();
 

@@ -1,48 +1,20 @@
-const initFirstCategory = (Category) => {
+const Category = require('./schemas/Category');
 
+const initFirstCategory = () => {
     const data = [
-        {
-            name: "Amistad",
-            shortName: "amistad"
-        },
-        {
-            name: "Así va España",
-            shortName: "ave"
-        },
-        {
-            name: "Estudios",
-            shortName: "estudios"
-        },
-        {
-            name: "Picante",
-            shortName: "picante"
-        },
-        {
-            name: "Trabajo",
-            shortName: "trabajo",
-        },
-        {
-            name: "Amor",
-            shortName: "amor"
-        },
-        {
-            name: "Dinero",
-            shortName: "dinero"
-        },
-        {
-            name: "Familia",
-            shortName: "familia"
-        },
-        {
-            name: "Salud",
-            shortName: "salud"
-        },
-        {
-            name: "Varios",
-            shortName: "varios"
-        }
+        { name: "Amistad", shortName: "amistad" },
+        { name: "Así va España", shortName: "ave"},
+        { name: "Estudios", shortName: "estudios" },
+        { name: "Picante", shortName: "picante" },
+        { name: "Trabajo", shortName: "trabajo" },
+        { name: "Amor", shortName: "amor" },
+        { name: "Dinero", shortName: "dinero" },
+        { name: "Familia", shortName: "familia" },
+        { name: "Salud", shortName: "salud" },
+        { name: "Varios", shortName: "varios" }
     ];
 
+    console.log("im in countDocuments")
     Category.countDocuments().then((count) => {
         if (count === 0) {
             data.forEach(category => {
@@ -54,4 +26,4 @@ const initFirstCategory = (Category) => {
     });
 };
 
-module.exports = {initFirstCategory};
+module.exports = initFirstCategory;

@@ -1,9 +1,16 @@
 require('dotenv').config();
+
 const express = require('express');
+const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-var cookieParser = require('cookie-parser');
+const cookieParser = require('cookie-parser');
 const cors = require('cors');
+
 const globalRouter = require('./src/controllers/globalRouter').globalRouter;
+const initFirstCategory = require('./src/mongo/initFirstCategory');
+const connect = require('./src/mongo').connect;
+
+console.log("im in app");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,6 +31,12 @@ app.use((req, res, next) => {
     res.status(404).render("404");
 })
 
-app.listen(PORT, () => {
-	console.log(`App listening at http://localhost:${PORT}`)
+app.on('ready', () => {
+    app.listen(PORT, () => {
+        console.log(`App listening at http://localhost:${PORT}`)
+		initFirstCategory();
+    })
 })
+
+connect();
+mongoose.connection.once('open', () => app.emit('ready'));

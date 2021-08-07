@@ -1,6 +1,8 @@
 const { validationResult } = require('express-validator');
 const models = require('../../mongo');
 
+console.log("im in middleware")
+
 const validationChecks = (req, res, next) => {
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
@@ -20,6 +22,7 @@ const categoriesLoad = async (req, res, next) => {
 };
 
 const isLogged = async (req, res, next) => {
+	console.log("im in isLogged")
 	req.isLogged = false;
 	if (req.cookies.userLog) {
 		req.isLogged = true;
