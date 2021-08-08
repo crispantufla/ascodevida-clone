@@ -4,11 +4,10 @@ function uploadPreview() {
     let textArea = document.getElementById("text-to-post");
 
     if (when.value == '¿Cuándo?') {
-        when = "Por favor Elige cuando. "
+        when = 'Por favor Elige cuando. '
     } else {
-        when = when.value + ", "
+        when = when.options[when.selectedIndex].text + ',' 
     }
 
     preview.innerHTML = `${when} ${textArea.value}. ADV`;
-    
 }

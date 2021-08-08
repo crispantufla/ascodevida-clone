@@ -3,11 +3,11 @@ async function voteFetch(params) {
     let parentElementId = params.element.parentNode.parentNode.dataset.id;
 
     if (params.path == 'vota') {
-        finalPath = `http://localhost:3001/${params.path}/${parentElementId}/${params.type}`;
+        finalPath = `/${params.path}/${parentElementId}/${params.type}`;
     };
 
     if (params.path == 'addfav') {
-        finalPath = `http://localhost:3001/${params.path}/${parentElementId}`;
+        finalPath = `/${params.path}/${parentElementId}`;
     };
 
     fetch(finalPath, { method: params.method }).then(response => response.json()
