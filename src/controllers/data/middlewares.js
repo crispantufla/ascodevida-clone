@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 const models = require('../../mongo');
+const mongoose = require('mongoose');
 
 const validationChecks = (req, res, next) => {
 	const errors = validationResult(req);
@@ -36,8 +37,22 @@ const isLogged = async (req, res, next) => {
 	next();
 };
 
+const checkPostId = async (req, res, next) => {
+	if (!mongoose.Types.ObjectId.isValid(req.params.postId)) {
+		return res.status(404).send({ message: "La id del post es erronea." })
+	}
+
+	const post = await models.post.find({_id: req.params.postId});
+	if (!post) {
+		return res.status(404).send({ message: "La id del post es erronea." })
+	}
+	req.post = post;
+	next();	
+}
+
 module.exports = {
 	validationChecks,
 	categoriesLoad,
-	isLogged
+	isLogged,
+	checkPostId
 };

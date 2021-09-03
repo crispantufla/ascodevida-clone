@@ -1,6 +1,6 @@
 const express = require('express');
 const models = require('../mongo');
-const { validationChecks, categoriesLoad, isLogged } = require('./data/middlewares');
+const { validationChecks, categoriesLoad, isLogged, checkPostId } = require('./data/middlewares');
 const { check } = require('express-validator');
 const rand = require('csprng');
 const CryptoJS = require("crypto-js");
@@ -131,18 +131,9 @@ const globalRouter = () => {
 	})
 
 	//VOTE POST
-	router.post('/vota/:postId/:type', async (req, res) => {
+	router.post('/vota/:postId/:type', checkPostId, async (req, res) => {
 		if (!req.isLogged) {
 			return res.send({ message: "Solo usuarios registrados pueden votar" })
-		}
-
-		if (!mongoose.Types.ObjectId.isValid(req.params.postId)) {
-			return res.status(404).send({ message: "estoy aca La id del post es erronea." })
-		}
-
-		const post = await models.post.findById(req.params.postId);
-		if (!post) {
-			return res.status(404).send({ message: "La id del post es erronea." })
 		}
 
 		if (req.params.type > 3 || req.params.type < 1) {
@@ -171,22 +162,16 @@ const globalRouter = () => {
 		})
 	})
 
-	router.get('/:postId', async (req, res) => {
-		if (!mongoose.Types.ObjectId.isValid(req.params.postId)) {
-			return res.redirect('/')
+	router.get('/:postId', checkPostId, async (req, res) => {
+		if (req.isLogged) {
+			let fav = await models.favorite.findOne({ post: req.post._id, user: req.user._id });
+			req.post.alreadyFav = !!fav;
 		}
-
-		models.post.find({_id: req.params.postId}).then( async (post) => {
-			if (req.isLogged) {
-				let fav = await models.favorite.findOne({ post: post._id, user: req.user._id });
-				post.alreadyFav = !!fav;
-			}
-			router.renderParams.needPagination = false;
-			router.renderParams.place = "home";
-			router.renderParams.posts = post;
-			router.renderParams.titleWeb = 'ADV / Mis posts';
-			return res.status(200).render('index', router.renderParams);
-		})
+		router.renderParams.needPagination = false;
+		router.renderParams.place = "home";
+		router.renderParams.posts = req.post;
+		router.renderParams.titleWeb = 'ADV / Mis posts';
+		return res.status(200).render('index', router.renderParams);
 	})
 
 	//USERS POSTS
@@ -223,16 +208,7 @@ const globalRouter = () => {
 		})
 	})
 
-	router.post('/addfav/:postId', async (req, res) => {
-		if (!mongoose.Types.ObjectId.isValid(req.params.postId)) {
-			return res.status(404).send({ message: "La id del post es erronea." })
-		}
-
-		const post = await models.post.findById(req.params.postId);
-		if (!post) {
-			return res.status(404).send({ message: "La id del post es erronea." })
-		}
-
+	router.post('/addfav/:postId', checkPostId, (req, res, next) => {
 		let favorite = new models.favorite({
 			user: req.user._id,
 			post: req.params.postId
@@ -244,16 +220,7 @@ const globalRouter = () => {
 		})
 	})
 
-	router.delete('/addfav/:postId', (req, res) => {
-		if (!mongoose.Types.ObjectId.isValid(req.params.postId)) {
-			return res.status(404).send({ message: "La id del post es erronea." })
-		}
-
-		const post = await models.post.findById(req.params.postId);
-		if (!post) {
-			return res.status(404).send({ message: "La id del post es erronea." })
-		}
-		
+	router.delete('/addfav/:postId', checkPostId, (req, res) => {
 		return models.favorite.deleteOne({
 			user: req.user._id,
 			post: req.params.postId
