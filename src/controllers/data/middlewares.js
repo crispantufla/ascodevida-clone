@@ -1,8 +1,6 @@
 const { validationResult } = require('express-validator');
 const models = require('../../mongo');
 
-console.log("im in middleware")
-
 const validationChecks = (req, res, next) => {
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
@@ -15,25 +13,24 @@ const validationChecks = (req, res, next) => {
 }
 
 const categoriesLoad = async (req, res, next) => {
-	console.log("im in categoriesLoad")
 	let categories = await models.category.find().sort({ name: 1 });
 	req.categories = categories;
 	next();
 };
 
 const isLogged = async (req, res, next) => {
-	console.log("im in isLogged")
 	req.isLogged = false;
 	if (req.cookies.userLog) {
 		req.isLogged = true;
 		const user = await models.cookies.findOne({ token: req.cookies.userLog }).populate('user', ['nickname', 'email']);
-		if (user) {
-		req.user = user.user;
-		} else {
+		if (!user) {
+			res.clearCookie('userLog');
 			return res.redirect('/')
 		}
+
+		req.user = user.user;
 		if (req.url == '/login' || req.url == '/register') {
-			return res.redirect('/')
+			return res.redirect(301, '/')
 		};
 	};
 	next();

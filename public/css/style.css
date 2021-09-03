@@ -1,3 +1,5 @@
+@import url("post/style.css");
+
 *{
     margin: 0;
     padding: 0;
@@ -234,6 +236,8 @@ body {
 .twit-box a {
     color: #cc0099;
     cursor: pointer;
+    overflow-wrap: anywhere;
+    text-decoration: none;
 }
 
 .story {

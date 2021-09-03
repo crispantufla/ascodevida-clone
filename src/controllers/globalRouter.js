@@ -6,8 +6,6 @@ const rand = require('csprng');
 const CryptoJS = require("crypto-js");
 const mongoose = require('mongoose');
 
-console.log("in im globalRouter")
-
 const globalRouter = () => {
 	const router = express.Router();
 
@@ -63,7 +61,7 @@ const globalRouter = () => {
 
 		let skip = (currentPage - 1) * limit;
 		if (skip < 0) {
-			return res.status(404).redirect('/')
+			return res.redirect('/')
 		}
 
 		finalQuery = finalQuery.limit(limit).skip(skip);
@@ -93,58 +91,27 @@ const globalRouter = () => {
 		})
 	})
 
-	//SEARCH
-	router.use('/search/:namesearch/', async (req, res) => {
-		const namesearch = req.params.namesearch;
-		let totalPosts = await models.post.countDocuments({ "content": { "$regex": namesearch, "$options": "i" } });
-		let currentPage = req.query.page;
-		let limit = 15;
-		let totalPages = Math.ceil(totalPosts / limit);
-		let skip = (currentPage - 1) * limit;
-		if (skip < 0) {
-			return res.status(404).redirect('/')
-		}
-
-		return models.post.find({ "content": { "$regex": namesearch, "$options": "i" } }).limit(limit).skip(skip)
-			.then(posts => {
-				if (posts.length > 0) {
-					res.status(200).render('index', {
-						posts: posts,
-						totalPages: totalPages,
-						categories: req.categories,
-						isLogged: req.isLogged,
-						user: (req.isLogged ? req.user.nickname : null),
-						totalPages: totalPages
-					})
-				} else {
-					res.status(200).send({ menssage: "no result data" })
-				}
-			}).catch((err) => {
-				res.status(500).send({ error: err })
-			})
-	})
-
 	//CREATE POST
 	router.post('/post', async (req, res) => {
 
 		if (!mongoose.Types.ObjectId.isValid(req.body.category)) {
-			return res.status(404).redirect('/')
+			return res.redirect('/')
 		}
 
 		let searchCategory = await models.category.findOne({ _id: req.body.category })
 		if (!searchCategory) {
-			return res.status(404).redirect('/')
+			return res.redirect('/')
 		}
 
 		if (req.body.gender != "Hombre" && req.body.gender != "Mujer") {
-			return res.status(404).redirect('/')
-		}
-
-		if (req.body.when < 0 || req.body.when > 5) {
-			return res.status(404).redirect('/')
+			return res.redirect('/')
 		}
 
 		const whenArray = ["Hoy", "Ayer", "La semana pasada", "Hace unos meses", "Hace unos años", "Hace tiempo"];
+		if (req.body.when < 0 || req.body.when >= whenArray.length) {
+			return res.redirect('/')
+		}
+
 		let fixedContent = `${whenArray[req.body.when]} ${req.body.content}. ADV`;
 
 		let postObject = {
@@ -157,7 +124,7 @@ const globalRouter = () => {
 
 		let post = new models.post(postObject);
 		return post.save().then(() => {
-			res.status(200).redirect('/')
+			res.redirect('/')
 		}).catch(err => {
 			res.status(500).send({ error: err })
 		})
@@ -167,6 +134,15 @@ const globalRouter = () => {
 	router.post('/vota/:postId/:type', async (req, res) => {
 		if (!req.isLogged) {
 			return res.send({ message: "Solo usuarios registrados pueden votar" })
+		}
+
+		if (!mongoose.Types.ObjectId.isValid(req.params.postId)) {
+			return res.status(404).send({ message: "estoy aca La id del post es erronea." })
+		}
+
+		const post = await models.post.findById(req.params.postId);
+		if (!post) {
+			return res.status(404).send({ message: "La id del post es erronea." })
 		}
 
 		if (req.params.type > 3 || req.params.type < 1) {
@@ -192,6 +168,24 @@ const globalRouter = () => {
 			).catch(err => {
 				res.status(500).send({ error: err })
 			})
+		})
+	})
+
+	router.get('/:postId', async (req, res) => {
+		if (!mongoose.Types.ObjectId.isValid(req.params.postId)) {
+			return res.redirect('/')
+		}
+
+		models.post.find({_id: req.params.postId}).then( async (post) => {
+			if (req.isLogged) {
+				let fav = await models.favorite.findOne({ post: post._id, user: req.user._id });
+				post.alreadyFav = !!fav;
+			}
+			router.renderParams.needPagination = false;
+			router.renderParams.place = "home";
+			router.renderParams.posts = post;
+			router.renderParams.titleWeb = 'ADV / Mis posts';
+			return res.status(200).render('index', router.renderParams);
 		})
 	})
 
@@ -229,7 +223,16 @@ const globalRouter = () => {
 		})
 	})
 
-	router.post('/addfav/:postId', (req, res) => {
+	router.post('/addfav/:postId', async (req, res) => {
+		if (!mongoose.Types.ObjectId.isValid(req.params.postId)) {
+			return res.status(404).send({ message: "La id del post es erronea." })
+		}
+
+		const post = await models.post.findById(req.params.postId);
+		if (!post) {
+			return res.status(404).send({ message: "La id del post es erronea." })
+		}
+
 		let favorite = new models.favorite({
 			user: req.user._id,
 			post: req.params.postId
@@ -242,6 +245,15 @@ const globalRouter = () => {
 	})
 
 	router.delete('/addfav/:postId', (req, res) => {
+		if (!mongoose.Types.ObjectId.isValid(req.params.postId)) {
+			return res.status(404).send({ message: "La id del post es erronea." })
+		}
+
+		const post = await models.post.findById(req.params.postId);
+		if (!post) {
+			return res.status(404).send({ message: "La id del post es erronea." })
+		}
+		
 		return models.favorite.deleteOne({
 			user: req.user._id,
 			post: req.params.postId
@@ -294,7 +306,7 @@ const globalRouter = () => {
 		let users = await models.user.find(({ $or: [{ email: user.email }, { nickname: user.nickname }] }));
 		if (users.length == 0) {
 			return user.save().then(() => {
-				res.status(200).redirect('/')
+				res.redirect('/')
 			}).catch((err) => {
 				router.renderParams.response = { errorMsg: err };
 				res.status(409).render('index', router.renderParams.response);
@@ -328,7 +340,7 @@ const globalRouter = () => {
 				let cookie = new models.cookies({ token: token, user: resultUser._id });
 				cookie.save();
 				res.cookie('userLog', token);
-				return res.status(200).redirect('/');
+				return res.redirect('/');
 			} else {
 				router.renderParams.response = { errorMsg: "Contraseña invalida" };
 				return res.status(409).render('index', router.renderParams);
@@ -341,7 +353,7 @@ const globalRouter = () => {
 
 	router.get('/logOut', (req, res) => {
 		res.clearCookie('userLog');
-		return res.status(200).redirect('/');
+		return res.redirect('/');
 	})
 
 	//FORGET PASS

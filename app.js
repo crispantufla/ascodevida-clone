@@ -10,8 +10,6 @@ const globalRouter = require('./src/controllers/globalRouter').globalRouter;
 const initFirstCategory = require('./src/mongo/initFirstCategory');
 const connect = require('./src/mongo').connect;
 
-console.log("im in app");
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(cors({

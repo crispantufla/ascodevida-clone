@@ -14,7 +14,6 @@ const initFirstCategory = () => {
         { name: "Varios", shortName: "varios" }
     ];
 
-    console.log("im in countDocuments")
     Category.countDocuments().then((count) => {
         if (count === 0) {
             data.forEach(category => {
