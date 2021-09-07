@@ -174,7 +174,6 @@ const globalRouter = () => {
 	})
 
 	router.get('/perfil/:user', async (req, res) => {
-		console.log("holas")
 		let user = await models.user.findOne({ nickname: { "$regex": `^${req.params.user}$`, "$options": "i" } });
 		if (!user) {
 			return res.redirect(301, '/')
@@ -268,7 +267,6 @@ const globalRouter = () => {
 
 		if (req.validationChecksError) {
 			router.renderParams.response = { errorMsg: req.validationChecksError };
-			console.log(req.validationChecksError)
 			return res.status(409).render('index', router.renderParams);
 		}
 
