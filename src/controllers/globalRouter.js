@@ -1,6 +1,6 @@
 const express = require('express');
 const models = require('../mongo');
-const { validationChecks, categoriesLoad, isLogged, checkPostId } = require('./data/middlewares');
+const { validationChecks, categoriesLoad, isLogged, checkIdAndGetPost } = require('./data/middlewares');
 const { check } = require('express-validator');
 const rand = require('csprng');
 const CryptoJS = require("crypto-js");
@@ -93,7 +93,6 @@ const globalRouter = () => {
 
 	//CREATE POST
 	router.post('/post', async (req, res) => {
-		console.log(__dirname)
 		if (!mongoose.Types.ObjectId.isValid(req.body.category)) {
 			return res.redirect('/')
 		}
@@ -131,7 +130,7 @@ const globalRouter = () => {
 	})
 
 	//VOTE POST
-	router.post('/vota/:postId/:type', checkPostId, async (req, res) => {
+	router.post('/vota/:postId/:type', checkIdAndGetPost, async (req, res) => {
 		if (!req.isLogged) {
 			return res.send({ message: "Solo usuarios registrados pueden votar" })
 		}
@@ -162,7 +161,7 @@ const globalRouter = () => {
 		})
 	})
 
-	router.get('/post/:postId', checkPostId, async (req, res) => {
+	router.get('/post/:postId', checkIdAndGetPost, async (req, res) => {
 		if (req.isLogged) {
 			let fav = await models.favorite.findOne({ post: req.post._id, user: req.user._id });
 			req.post.alreadyFav = !!fav;
@@ -208,7 +207,7 @@ const globalRouter = () => {
 		})
 	})
 
-	router.post('/addfav/:postId', checkPostId, (req, res, next) => {
+	router.post('/addfav/:postId', checkIdAndGetPost, (req, res, next) => {
 		let favorite = new models.favorite({
 			user: req.user._id,
 			post: req.params.postId
@@ -220,7 +219,7 @@ const globalRouter = () => {
 		})
 	})
 
-	router.delete('/addfav/:postId', checkPostId, (req, res) => {
+	router.delete('/addfav/:postId', checkIdAndGetPost, (req, res) => {
 		return models.favorite.deleteOne({
 			user: req.user._id,
 			post: req.params.postId
@@ -270,7 +269,7 @@ const globalRouter = () => {
 
 		let user = new models.user(req.body);
 		user.password = CryptoJS.SHA256(user.password);
-		let users = await models.user.find(({ $or: [{ email: user.email }, { nickname: user.nickname }] }));
+		let users = await models.user.find(({ $or: [{ email: user.email }, { nickname: { "$regex": user.nickname, "$options": "i" } }] }));
 		if (users.length == 0) {
 			return user.save().then(() => {
 				res.redirect('/')

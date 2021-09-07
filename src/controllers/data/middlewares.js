@@ -37,7 +37,7 @@ const isLogged = async (req, res, next) => {
 	next();
 };
 
-const checkPostId = async (req, res, next) => {
+const checkIdAndGetPost = async (req, res, next) => {
 	if (!mongoose.Types.ObjectId.isValid(req.params.postId)) {
 		return res.status(404).send({ message: "La id del post es erronea." })
 	}
@@ -54,5 +54,5 @@ module.exports = {
 	validationChecks,
 	categoriesLoad,
 	isLogged,
-	checkPostId
+	checkIdAndGetPost
 };
