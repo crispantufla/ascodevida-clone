@@ -173,24 +173,8 @@ const globalRouter = () => {
 		return res.status(200).render('index', router.renderParams);
 	})
 
-	//USERS POSTS
-	router.get('/perfil', (req, res) => {
-		return models.post.find({user: req.user.id})
-			.populate('category', ['name', 'shortName'])
-			.populate('user', 'nickname')
-			.then(posts => {
-			router.renderParams.needPagination = false;
-			router.renderParams.place = "home";
-			router.renderParams.posts = posts;
-			router.renderParams.titleWeb = 'ADV / Mis posts'
-			res.status(200).render('index', router.renderParams);
-		}).catch(err => {
-			res.status(500).send({ error: err })
-			console.log(err)
-		})
-	})
-
 	router.get('/perfil/:user', async (req, res) => {
+		console.log("holas")
 		let user = await models.user.findOne({ nickname: { "$regex": `^${req.params.user}$`, "$options": "i" } });
 		if (!user) {
 			return res.redirect(301, '/')
@@ -208,11 +192,6 @@ const globalRouter = () => {
 			res.status(500).send({ error: err })
 			console.log(err)
 		})
-		router.renderParams.needPagination = false;
-		router.renderParams.place = "home";
-		router.renderParams.posts = posts;
-		router.renderParams.titleWeb = 'ADV / Mis posts'
-		res.status(200).render('index', router.renderParams);
 	})
 
 	//FAVS, ADD AND DELETE FAVS
