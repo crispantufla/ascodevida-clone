@@ -10,7 +10,7 @@
             <form class="box-form" method="POST" action="/login">
                 <div class="box-field">
                     <label class="box-label">Usuario *</label>
-                    <input name="nickname" type="text" class="box-input" required />
+                    <input name="nickname" type="text" class="box-input" <% if (!!previusForm) { %> value="<%= previusForm.nickname %>" <% } %> required />
                 </div>
                 <div class="box-field">
                     <label class="box-label">Contraseña *</label>

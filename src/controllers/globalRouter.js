@@ -280,7 +280,7 @@ const globalRouter = () => {
 			});
 		}
 
-		router.renderParams.previusForm = {nickname: user.nickname, email: user.email};
+		router.renderParams.previusForm = { nickname: user.nickname, email: user.email };
 
 		if (users[0].email == user.email) {
 			router.renderParams.response = { errorMsg: 'Email ya registrado' };
@@ -294,6 +294,7 @@ const globalRouter = () => {
 	router.get('/login', (req, res) => {
 		router.renderParams.place = "login";
 		router.renderParams.titleWeb = 'ADV / Login'
+		router.renderParams.previusForm = false;
 		res.status(200).render('index', router.renderParams);
 	})
 
@@ -303,6 +304,7 @@ const globalRouter = () => {
 		user.password = CryptoJS.SHA256(user.password);
 		user.password = user.password.toString(CryptoJS.enc.Hex);
 		let resultUser = await models.user.findOne({ nickname: user.nickname });
+		router.renderParams.previusForm = { nickname: user.nickname };
 		if (resultUser) {
 			if (resultUser.password == user.password) {
 				let token = rand(300, 36);
