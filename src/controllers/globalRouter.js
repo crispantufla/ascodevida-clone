@@ -162,7 +162,7 @@ const globalRouter = () => {
 		})
 	})
 
-	router.get('/:postId', checkPostId, async (req, res) => {
+	router.get('/post/:id',  async (req, res) => {
 		if (req.isLogged) {
 			let fav = await models.favorite.findOne({ post: req.post._id, user: req.user._id });
 			req.post.alreadyFav = !!fav;
