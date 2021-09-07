@@ -35,10 +35,6 @@ const isLogged = async (req, res, next) => {
 		};
 	};
 
-	if (req.url == '/favoritos') {
-		return res.redirect(301, '/')
-	};
-
 	next();
 };
 

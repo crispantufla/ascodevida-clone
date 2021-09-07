@@ -194,7 +194,7 @@ const globalRouter = () => {
 	})
 
 	//FAVS, ADD AND DELETE FAVS
-	router.get('/favoritos', (req, res) => {
+	router.get('/favorites', (req, res) => {
 		return models.favorite.find({user: req.user.id}).populate('post').then(userFavorites => {
 			userFavorites = userFavorites.map(item => {
 				item.post.alreadyFav = true;
