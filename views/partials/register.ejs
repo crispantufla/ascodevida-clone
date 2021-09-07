@@ -14,15 +14,15 @@
             <form class="box-form" method="POST" action="/register">
                 <div class="box-field">
                     <label class="box-label">Usuario *</label>
-                    <input name="nickname" id="nickname" type="text" class="box-input" required />
+                    <input name="nickname" id="nickname" type="text" class="box-input" <% if (!!previusForm) { %> value="<%= previusForm.nickname %>" <% } %> required />
                 </div>
                 <div class="box-field">
                     <label class="box-label">Email *</label>
-                    <input name="email" id="email" type="email" class="box-input" required />
+                    <input name="email" id="email" type="email" class="box-input" <% if (!!previusForm) { %> value="<%= previusForm.email %>" <% } %> required />
                 </div>
                 <div class="box-field">
                     <label class="box-label">Confirma el email *</label>
-                    <input name="emailConfirm" id="emailConfirm" type="email" class="box-input" required />
+                    <input name="emailConfirm" id="emailConfirm" type="email" class="box-input"  <% if (!!previusForm) { %> value="<%= previusForm.email %>" <% } %> required />
                 </div>
                 <div class="box-field">
                     <label class="box-label">Contraseña *</label>

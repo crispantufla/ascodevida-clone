@@ -255,6 +255,7 @@ const globalRouter = () => {
 	router.get('/register', (req, res) => {
 		router.renderParams.place = "register";
 		router.renderParams.titleWeb = 'ADV / Registro'
+		router.renderParams.previusForm = false;
 		res.status(200).render('index', router.renderParams);
 	})
 
@@ -278,6 +279,8 @@ const globalRouter = () => {
 				res.status(409).render('index', router.renderParams.response);
 			});
 		}
+
+		router.renderParams.previusForm = {nickname: user.nickname, email: user.email};
 
 		if (users[0].email == user.email) {
 			router.renderParams.response = { errorMsg: 'Email ya registrado' };

@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const schema = new mongoose.Schema({
-	email: String,
-	verifyPassCode: String,
+	email: { type: String, required: true },
+	verifyPassCode: { type: String, required: true },
 	createdAt: { type: Date, default: Date.now }
 });
 
