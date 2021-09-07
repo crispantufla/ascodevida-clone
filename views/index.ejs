@@ -1,20 +1,20 @@
-<%- include('template/head'); %>
+<%- include('partials/head'); %>
 <body>
-	<%- include('template/navbar'); %>
-	<%- include('template/header'); %>
+	<%- include('partials/navbar'); %>
+	<%- include('partials/header'); %>
 	<div class="container">
 		<div class="main">
-			<%- include('template/addContent') %>
-			<%- include('template/advancedSearch') %>
+			<%- include('partials/addContent') %>
+			<%- include('partials/advancedSearch') %>
 			<% if ( place == "home" ) { %>
-				<%- include('template/home') %>
+				<%- include('partials/home') %>
 			<% } else if ( place == "register") { %>
-				<%- include('template/register') %>
+				<%- include('partials/register') %>
 			<% } else { %>
-				<%- include('template/login') %>
+				<%- include('partials/login') %>
 			<% }; %>
 		</div>
-		<%- include('template/sideBar'); %>
+		<%- include('partials/sideBar'); %>
 	</div>
 </body>
 </html>

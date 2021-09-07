@@ -93,7 +93,7 @@ const globalRouter = () => {
 
 	//CREATE POST
 	router.post('/post', async (req, res) => {
-
+		console.log(__dirname)
 		if (!mongoose.Types.ObjectId.isValid(req.body.category)) {
 			return res.redirect('/')
 		}
@@ -162,7 +162,7 @@ const globalRouter = () => {
 		})
 	})
 
-	router.get('/post/:id',  async (req, res) => {
+	router.get('/post/:postId', checkPostId, async (req, res) => {
 		if (req.isLogged) {
 			let fav = await models.favorite.findOne({ post: req.post._id, user: req.user._id });
 			req.post.alreadyFav = !!fav;
