@@ -34,6 +34,11 @@ const isLogged = async (req, res, next) => {
 			return res.redirect(301, '/')
 		};
 	};
+
+	if (req.url == '/perfil') {
+		return res.redirect(301, '/')
+	};
+
 	next();
 };
 

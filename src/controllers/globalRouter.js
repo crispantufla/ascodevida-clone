@@ -190,6 +190,31 @@ const globalRouter = () => {
 		})
 	})
 
+	router.get('/perfil/:user', async (req, res) => {
+		let user = await models.user.findOne({ nickname: { "$regex": `^${req.params.user}$`, "$options": "i" } });
+		if (!user) {
+			return res.redirect(301, '/')
+		}
+		return models.post.find({user: user._id})
+		.populate('category', ['name', 'shortName'])
+		.populate('user', 'nickname')
+		.then(posts => {
+			router.renderParams.needPagination = false;
+			router.renderParams.place = "home";
+			router.renderParams.posts = posts;
+			router.renderParams.titleWeb = 'ADV / Mis posts'
+			res.status(200).render('index', router.renderParams);
+		}).catch(err => {
+			res.status(500).send({ error: err })
+			console.log(err)
+		})
+		router.renderParams.needPagination = false;
+		router.renderParams.place = "home";
+		router.renderParams.posts = posts;
+		router.renderParams.titleWeb = 'ADV / Mis posts'
+		res.status(200).render('index', router.renderParams);
+	})
+
 	//FAVS, ADD AND DELETE FAVS
 	router.get('/favoritos', (req, res) => {
 		return models.favorite.find({user: req.user.id}).populate('post').then(userFavorites => {
