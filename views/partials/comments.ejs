@@ -1,0 +1,59 @@
+<div class="violet-box">
+	<span class="left">Comentarios</span>
+	<a class="right">Ordenar por mejores comentarios</a>
+	<span class="clear"></span>
+</div>
+<% if (comments.length > 0) {%>
+	<% comments.forEach((comment) => { %>
+		<div class="twit-box">
+			<div class="pre-comment">
+				#1 por
+				<span>
+					<a><%= comment.user.nickname %> </a>
+				</span>
+				<br>
+				<span>
+					<%= comment.createdAt.toLocaleString('es-ES', {year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}) %> 
+				</span>
+			</div>
+			<div>
+				<p class="story-link">
+					<%= comment.content %>
+				</p>
+			</div>
+		</div>
+	<% }); %>
+	<% if (needPagination) { %><%- include('pagination') %><% } %> 
+<% } else { %>
+	<div class="noPostsYet">Ups.. parece que aqui aun no hay posts</div>
+<% } %>
+<% if (isLogged) { %>
+	<div class="violet-box">
+		<span class="left">Deja tu comentario</span>
+		<span class="clear"></span>
+	</div>
+	<div class="box-box">
+		<div class="box-content">
+			<h3 class="box-title">Intenta ser respetuoso, educado y no dar patadas al diccionario.</h3>
+			<p class="box-text">
+				No cumplir con las normas puede implicar la expulsión de la página. Cuesta muy poco ser vulgar, pero algo más ser ingenioso.
+			</p>
+			<p class="box-text">
+				Estás logueado como <%= user %> - <a href="/logOut">Desconectar</a>		
+			</p>
+			<form class="box-form" method="POST" action="/comment/<%=post._id%>">
+				<div class="box-field">
+					<textarea name="content" id="text-to-post" rows="7" maxlength="400" minlength="10" required></textarea>
+				</div>
+				<div class="box-field not-label-content">
+					<button type="submit" class="button-submit">Enviar comentario</button>
+			</div>
+			</form>
+		</div>
+	</div>
+<% } else { %>
+	<div class="violet-box">
+		<span class="left">Solo usuarios registrados pueden comentar, <a href="/register">Registrate</a></span>
+		<span class="clear"></span>
+	</div>
+<% }; %>

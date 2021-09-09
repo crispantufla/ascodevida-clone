@@ -247,6 +247,7 @@ body {
 .story-link {
     color: #444444 !important;
     clear: both;
+    overflow-wrap: anywhere;
 }
 
 .comment-box {
@@ -274,22 +275,22 @@ body {
     cursor: pointer;
 }
 
-.pre {
+.twit-box .pre {
     float: right;
     font-size: 10px;
     margin-bottom: 10px;
 }
 
-.pre a:link{
+.twit-box .pre a:link{
     text-decoration: none;
+}
+
+.twit-box .pre a:hover {
+    text-decoration: underline;
 }
 
 .gender-span {
     color: #cc0099;
-}
-
-.pre a:hover {
-    text-decoration: underline;
 }
 
 .bottom-twit {
@@ -610,4 +611,35 @@ body {
     margin-bottom: 5px;
     padding: 10px;
     width: 490px;
+}
+
+.violet-box {
+    color: #FFF;
+    background: #cc0099;
+    z-index: 1;
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 15px !important;
+    clear: both;
+}
+
+.violet-box .left {
+    float: left
+}
+
+.violet-box .right {
+    color: #FFF;
+    text-decoration: underline;
+    float: right;
+}
+
+.violet-box .clear {
+    clear: both;
+    display: block;
+}
+
+.pre-comment {
+    font-size: 10px;
+    margin-bottom: 10px;
+    margin-left: 10px;
 }

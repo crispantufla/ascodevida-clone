@@ -7,6 +7,7 @@ const Votes = require('./schemas/Votes');
 const VerifyPassCode = require('./schemas/VerifyPassCode');
 const Cookies = require('./schemas/Cookies');
 const Favorite = require('./schemas/Favorite');
+const Comment = require('./schemas/Comment')
 
 const connect = async () => {
     console.log("try to connect")
@@ -22,5 +23,6 @@ module.exports = {
 	verifyPassCode: VerifyPassCode,
 	cookies: Cookies,
 	favorite: Favorite,
-	connect: connect
+	comment: Comment,
+	connect: connect,
 }

@@ -16,7 +16,8 @@ const globalRouter = () => {
 			response: "empty",
 			user: (req.isLogged ? req.user.nickname : null),
 			titleWeb: 'ADV',
-			needPagination: true
+			needPagination: true,
+			comments: false
 		}
 
 		next()
@@ -129,6 +130,34 @@ const globalRouter = () => {
 		})
 	})
 
+	//COMENT POST
+	router.post('/comment/:postId', checkIdAndGetPost, (req, res) => {
+		if (!req.isLogged) {
+			return res.send({ message: "Solo usuarios registrados pueden comentar" })
+		}
+
+		let comment = new models.comment({
+			content: req.body.content,
+			user: req.user._id,
+			post: req.params.postId
+		})
+		
+		return comment.save().then(() => {
+			res.redirect('/post/' + req.params.postId)
+		}).catch(err => {
+			res.status(500).send({ error: err })
+		})
+	})
+
+	router.get('/comment/:postId', checkIdAndGetPost, (req, res) => {
+		return models.comment.find({ post: req.post._id }).populate('user', 'nickname')
+		.then(comments => {
+			res.status(200).send(comments);
+		}).catch(err => {
+			res.status(500).send({ error: err })
+		});
+	})
+
 	//VOTE POST
 	router.post('/vota/:postId/:type', checkIdAndGetPost, async (req, res) => {
 		if (!req.isLogged) {
@@ -166,9 +195,35 @@ const globalRouter = () => {
 			let fav = await models.favorite.findOne({ post: req.post._id, user: req.user._id });
 			req.post.alreadyFav = !!fav;
 		}
-		router.renderParams.needPagination = false;
+
+		let totalComments = await models.comment.countDocuments(models.comment.find({ post: req.post._id }));
+		if (totalComments < 50) {
+			router.renderParams.needPagination = false;
+		}
+
+		//pagination
+		let currentPage = 1;
+		if (req.query.page) {
+			currentPage = req.query.page;
+		}
+		let limit = 50;
+		let totalPages = Math.ceil(totalComments / limit);
+		if (totalPages <= 1) {
+			router.renderParams.needPagination = false;
+		}
+
+		let skip = (currentPage - 1) * limit;
+		if (skip < 0) {
+			return res.redirect('/')
+		}
+
+		let comments = await models.comment.find({ post: req.params.postId }).populate('user', 'nickname').limit(limit).skip(skip);
+
 		router.renderParams.place = "home";
 		router.renderParams.posts = req.post;
+		router.renderParams.comments = comments;
+		router.renderParams.totalPages = totalPages;
+		router.renderParams.currentPage = currentPage;
 		router.renderParams.titleWeb = 'ADV / Mis posts';
 		return res.status(200).render('index', router.renderParams);
 	})
@@ -194,7 +249,10 @@ const globalRouter = () => {
 	})
 
 	//FAVS, ADD AND DELETE FAVS
-	router.get('/favorites', (req, res) => {
+	router.get('/fav', (req, res) => {
+		if ( !req.isLogged ) {
+			return res.redirect(301, '/')
+		}
 		return models.favorite.find({user: req.user.id}).populate('post').then(userFavorites => {
 			userFavorites = userFavorites.map(item => {
 				item.post.alreadyFav = true;
@@ -210,7 +268,7 @@ const globalRouter = () => {
 		})
 	})
 
-	router.post('/addfav/:postId', checkIdAndGetPost, (req, res, next) => {
+	router.post('/addfav/:postId', checkIdAndGetPost, (req, res) => {
 		let favorite = new models.favorite({
 			user: req.user._id,
 			post: req.params.postId
