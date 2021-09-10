@@ -1,6 +1,5 @@
 <div class="violet-box">
 	<span class="left">Comentarios</span>
-	<a class="right">Ordenar por mejores comentarios</a>
 	<span class="clear"></span>
 </div>
 <% if (comments.length > 0) {%>
@@ -9,7 +8,7 @@
 			<div class="pre-comment">
 				#1 por
 				<span>
-					<a><%= comment.user.nickname %> </a>
+					<a href="/perfil/<%=comment.user.nickname%>"><%= comment.user.nickname %></a>
 				</span>
 				<br>
 				<span>

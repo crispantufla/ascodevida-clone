@@ -627,12 +627,6 @@ body {
     float: left
 }
 
-.violet-box .right {
-    color: #FFF;
-    text-decoration: underline;
-    float: right;
-}
-
 .violet-box .clear {
     clear: both;
     display: block;

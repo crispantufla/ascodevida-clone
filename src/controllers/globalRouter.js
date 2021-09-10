@@ -65,7 +65,7 @@ const globalRouter = () => {
 			return res.redirect('/')
 		}
 
-		finalQuery = finalQuery.limit(limit).skip(skip);
+		finalQuery = finalQuery.limit(limit).skip(skip).lean();
 
 		if (req.query.sort == "aleatorio") {
 			finalQuery = models.post.aggregate().sample(limit);
@@ -73,8 +73,10 @@ const globalRouter = () => {
 		}
 
 		return finalQuery.then(async (posts) => {
-			if (req.isLogged) {
-				for (let x = 0; x < posts.length; x++) {
+			for (let x = 0; x < posts.length; x++) {
+				let totalComments = await models.comment.countDocuments({ post: posts[x]._id });
+				posts[x].totalComments = totalComments
+				if (req.isLogged) {
 					let fav = await models.favorite.findOne({ post: posts[x]._id, user: req.user._id });
 					posts[x].alreadyFav = !!fav;
 				}
@@ -192,16 +194,17 @@ const globalRouter = () => {
 
 	router.get('/post/:postId', checkIdAndGetPost, async (req, res) => {
 		if (req.isLogged) {
-			let fav = await models.favorite.findOne({ post: req.post._id, user: req.user._id });
-			req.post.alreadyFav = !!fav;
+			let fav = await models.favorite.findOne({ post: req.params.postId, user: req.user._id });
+			req.post[0].alreadyFav = !!fav;
 		}
 
-		let totalComments = await models.comment.countDocuments(models.comment.find({ post: req.post._id }));
+		let totalComments = await models.comment.countDocuments(models.comment.find({ post: req.params.postId }));
+		req.post[0].totalComments = totalComments;
 		if (totalComments < 50) {
 			router.renderParams.needPagination = false;
 		}
 
-		//pagination
+		//pagination to comments
 		let currentPage = 1;
 		if (req.query.page) {
 			currentPage = req.query.page;

@@ -1,6 +1,6 @@
 <div class="twit-box" id="<%=(post._id)%>">
   <div class="comment-box">
-    <span><a>2</a></span>
+    <span><a><%= post.totalComments %> </a></span>
   </div>
   <div class="pre">
     Publicado por <span class="gender-span"><% if (post.gender == "Hombre") { %>♂<% } else { %>♀<% }; %></span>
@@ -27,10 +27,6 @@
         - <span><a onclick="voteFetch({path: 'addfav', element: this, method: 'POST'})">A favoritos</a></span>
       <% } %>
     <% } %>
-    <div class="to-share">
-      <a><img src="../images/twitter_button_share.png" alt="Onde ta mi imagen?"></a>
-      <a><img src="../images/facebook_button_share.png" alt="Onde ta mi imagen?"></a>
-    </div>
   </div>
 </div>
 <% if (!!comments) { %> 

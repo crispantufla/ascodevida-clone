@@ -43,7 +43,7 @@ const checkIdAndGetPost = async (req, res, next) => {
 		return res.status(404).send({ message: "La id del post es erronea." })
 	}
 
-	const post = await models.post.find({_id: req.params.postId});
+	const post = await models.post.find({_id: req.params.postId}).lean();
 	if (!post) {
 		return res.status(404).send({ message: "La id del post es erronea." })
 	}
