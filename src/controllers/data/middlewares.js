@@ -1,4 +1,5 @@
 const { validationResult } = require('express-validator');
+const { check } = require('express-validator');
 const models = require('../../mongo');
 const mongoose = require('mongoose');
 
@@ -51,9 +52,45 @@ const checkIdAndGetPost = async (req, res, next) => {
 	next();	
 }
 
+const completeRenderParams = (req, res, next) => {
+	req.renderParams = {
+		categories: req.categories,
+		isLogged: req.isLogged,
+		response: "empty",
+		user: (req.isLogged ? req.user.nickname : null),
+		titleWeb: 'ADV',
+		needPagination: true,
+		comments: false
+	}
+
+	next()
+}
+
+const arrayChecks = [
+	check('email')
+		.normalizeEmail()
+		.isEmail()
+		.withMessage('Introduzca una dirección de correo electrónico válida'),
+	check('password')
+		.isStrongPassword({
+			minLength: 8,
+			minLowercase: 1,
+			minUppercase: 1,
+			minNumbers: 1
+		})
+		.withMessage('Tu contraseña debe contener almenos 8 caracteres, debe contener almenos una mayuscula y una minuscula y un simbolo'),
+	check('nickname')
+		.custom(value => !/\s/.test(value))
+		.withMessage('No se permiten espacios')
+		.isLength({ min: 3, max: 16 })
+		.withMessage('Tu Usuario debe contener almenos 6 caracteres y maximo 12')
+]
+
 module.exports = {
 	validationChecks,
 	categoriesLoad,
 	isLogged,
-	checkIdAndGetPost
+	checkIdAndGetPost,
+	completeRenderParams,
+	arrayChecks
 };

@@ -530,6 +530,7 @@ body {
     border: 1px solid #ff4d3b;
     padding: 5px 10px;
     color: #ff4d3b;
+    display: block;
 }
 
 .box-list {
