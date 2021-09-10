@@ -1,6 +1,17 @@
 const models = require('../mongo');
 const mongoose = require('mongoose');
 
+const checkCommentsAndFavs = async (posts, req) => {
+    for (let x = 0; x < posts.length; x++) {
+        let totalComments = await models.comment.countDocuments({ post: posts[x]._id });
+        posts[x].totalComments = totalComments;
+        if (req.isLogged) {
+            let fav = await models.favorite.findOne({ post: posts[x]._id, user: req.user._id });
+            posts[x].alreadyFav = !!fav;
+        }
+    }
+}
+
 const home = async (req, res) => {
     let finalQuery = {};
     let categoryQuery = null;
@@ -50,15 +61,7 @@ const home = async (req, res) => {
     }
 
     return finalQuery.then(async (posts) => {
-        for (let x = 0; x < posts.length; x++) {
-            let totalComments = await models.comment.countDocuments({ post: posts[x]._id });
-            posts[x].totalComments = totalComments
-            if (req.isLogged) {
-                let fav = await models.favorite.findOne({ post: posts[x]._id, user: req.user._id });
-                posts[x].alreadyFav = !!fav;
-            }
-        }
-
+        await checkCommentsAndFavs(posts, req);
         req.renderParams.totalPages = totalPages;
         req.renderParams.currentPage = currentPage;
         req.renderParams.place = "home";
@@ -204,7 +207,8 @@ const userProfile = async (req, res) => {
     return models.post.find({user: user._id})
     .populate('category', ['name', 'shortName'])
     .populate('user', 'nickname')
-    .then(posts => {
+    .then(async posts => {
+        await checkCommentsAndFavs(posts, req);
         req.renderParams.needPagination = false;
         req.renderParams.place = "home";
         req.renderParams.posts = posts;
@@ -217,14 +221,17 @@ const userProfile = async (req, res) => {
 }
 
 const userFavs = (req, res) => {
+    console.log("hola")
     if ( !req.isLogged ) {
         return res.redirect(301, '/')
     }
     return models.favorite.find({user: req.user.id}).populate('post').then(userFavorites => {
         userFavorites = userFavorites.map(item => {
+            console.log(item)
             item.post.alreadyFav = true;
             return item.post;
         });
+
         req.renderParams.needPagination = false;
         req.renderParams.place = "home";
         req.renderParams.posts = userFavorites;

@@ -54,7 +54,7 @@ const globalRouter = () => {
 	router.get('/perfil/:user', userProfile)
 
 	//FAVS PAGE
-	router.get('/fav', userFavs)
+	router.get('/favs', userFavs)
 
 	//ADD FAV FOR USERS
 	router.post('/addfav/:postId', checkIdAndGetPost, addFav)
