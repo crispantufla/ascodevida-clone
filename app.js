@@ -38,3 +38,5 @@ app.on('ready', () => {
 
 connect();
 mongoose.connection.once('open', () => app.emit('ready'));
+
+console.log(process.env.MAILER_USER)

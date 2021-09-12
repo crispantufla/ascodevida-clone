@@ -3,15 +3,15 @@ const nodemailer = require("nodemailer");
 const sendMail = (code, email) => {
     console.log("estoy en sendMail");
     const transporter = nodemailer.createTransport({
-        service: 'gmail',
+        service: 'outlook',
         auth: {
-            user: "audiblenot@gmail.com",
+            user: "advcopy@outlook.es",
             pass: "150382Pato"
         }
     });
 
     let info = transporter.sendMail({
-        from: 'audiblenot@gmail.com', 
+        from: 'advcopy@outlook.es', 
         to: email, 
         subject: "Codigo de verificacion", 
         text: "Su codigo de verificacion es: " + code + " Por favor introduzcalo en el formulario y restaure su contraseña"
